@@ -21,3 +21,26 @@ Offline Audio Deepfake Detection System
 ## Notes
 - Works fully offline
 - Uploaded files are processed temporarily
+
+# EdgeGuard AI
+
+Offline Audio Deepfake Detection using Edge AI
+
+## 🚀 Features
+- Works fully offline
+- Lightweight edge-friendly model
+- Detects AI-generated / fake audio
+- Web-based UI + FastAPI backend
+
+## 🧠 Architecture
+Frontend (HTML/JS) → FastAPI → Offline Audio Engine (PyTorch)
+
+## ⚙️ Setup Instructions
+
+### 1. Clone the repo
+
+git clone git@github.com:umararshad-glitch/edgeguard-ai.git
+cd edgeguard_alt
+
+python -m pip install -r requirements.txt
+

@@ -1,107 +1,99 @@
 # EdgeGuard AI
 
-**Offline Audio Deepfake Detection using Edge AI**
+**Offline Audio & Video Deepfake Detection System**
 
-> Core audio analysis and inference engine implemented in **Python (FastAPI + PyTorch)**.  
-> Frontend is a **lightweight web interface** for easy interaction.
-
----
-
-## 🔍 What is EdgeGuard AI?
-
-**EdgeGuard AI** is an **offline-first audio deepfake detection system** that identifies whether an audio sample is **REAL or AI-generated (FAKE)**.
-
-The system runs entirely on the **local device (edge)** without sending any data to the cloud, ensuring **privacy, low latency, and usability in low-connectivity environments**.
+EdgeGuard AI is a privacy-first, fully offline deepfake detection system designed for edge devices.  
+It supports both **audio** and **video** deepfake analysis through a unified interface.
 
 ---
 
-## ✨ Key Features
+## 🚀 Features
 
-- ✅ Fully **offline** audio deepfake detection  
-- 🧠 Python-based inference engine (**PyTorch**)  
-- ⚡ FastAPI backend for real-time analysis  
-- 🖥️ Simple web UI (drag & drop audio upload)  
-- 🔒 Privacy-first (no cloud usage, no permanent storage)
+- ✅ Fully offline processing (no cloud, no APIs)
+- 🎧 Audio deepfake detection (WAV files)
+- 🎥 Video deepfake detection (MP4 files)
+- ⚖️ Outputs REAL / FAKE / UNCERTAIN with confidence
+- 🌐 FastAPI backend
+- 🎨 Lightweight, modern web frontend
+- 🔒 Privacy-first (files processed locally)
 
 ---
 
-## 🧠 How It Works
+## 🧠 System Architecture
 
-1. User uploads a **WAV audio file** via the web interface  
-2. Frontend sends the audio to the **FastAPI backend**  
-3. Backend extracts audio features and runs an **offline PyTorch model**  
-4. System returns:
-   - Prediction: **REAL / FAKE**
-   - Confidence score  
-5. Result is displayed instantly in the browser  
-
-**Pipeline:**
-
-      Frontend (HTML/JS)
-               ↓
+      Frontend (HTML / JS)
+              ↓
       FastAPI Backend
-               ↓
-      Offline Audio Engine (PyTorch)
+              ↓
+      Audio Engine (PyTorch)
+      Video Engine (OpenCV + MediaPipe)
 
 
----
-
-## 🚀 How to Run EdgeGuard AI 
-
-### 🔹 Prerequisites
-- Python **3.10 or higher**
-- Git
-- Any modern web browser
+Each engine works independently and is optimized for offline, edge-friendly execution.
 
 ---
 
-### 🔹 Step 1: Clone the Repository
+## ⚙️ Requirements
 
-git clone https://github.com/umararshad-glitch/edgeguard-ai.git
-cd edgeguard_alt
+- Python **3.10 or 3.11** (recommended)
+- Windows / Linux / macOS
+- No GPU required
 
-🔹 Step 2: Install Dependencies (One Time)
-python -m pip install -r requirements.txt
+---
 
-🔹 Step 3: Start the Backend Server
-python -m uvicorn backend.main:app --reload
+## 📦 Installation
 
-🔹 Step 4: Open the Frontend
+### 1️⃣ Clone the repository
+
+1. git clone https://github.com/umararshad-glitch/edgeguard-ai.git
+2. cd edgeguard_alt
+
+2️⃣ Install dependencies
+
+py -3.11 -m pip install -r requirements.txt
+
+If installing manually:
+
+py -3.11 -m pip install fastapi uvicorn torch librosa numpy python-multipart opencv-python mediapipe
+
+▶️ How to Run
+
+1️⃣ Start the backend
+
+py -3.11 -m uvicorn backend.main:app --reload
+
+2️⃣ Open the frontend
 
 Open this file in your browser:
+
 frontend/index.html
 
-🔹 Step 5: Test the System
+🧪 How to Use
 
-1. Upload any WAV audio file
-2. Click Analyze Audio
-3. View prediction and confidence
+1. Select Audio or Video
+2. Upload a file:
+   Audio: .wav
+   Video: .mp4
+3. Click Analyze
+4. View prediction and confidence
 
+📊 Output Labels
 
-🖱️ One-Click Run (Windows)
+REAL → High confidence genuine media
+FAKE → High confidence synthetic / manipulated media
+UNCERTAIN → Low confidence (ambiguous input)
 
-For easier access on Windows:
-1. Open the project folder in File Explorer
-2. Double-click:
-   run.bat
-3. Backend starts automatically
-4. Open frontend/index.html in browser
+The system is intentionally conservative to reduce false positives.
 
-🔒 Privacy & Offline Mode
+🎥 Video Detection Notes
 
-1. All audio is processed locally
-2. No files are stored permanently
-3. No internet connection required after setup
+1. Video detection is a lightweight offline module
+2. Uses facial consistency analysis across frames
+3. Designed for edge devices and demo scenarios
+4. Not a cloud-based or heavy deep learning pipeline
 
-🎯 Use Cases
+🔒 Privacy & Security
 
-1. Detecting AI-generated or manipulated audio
-2. Testing synthetic voices
-3. Educational demos on audio deepfakes
-4. Privacy-focused edge AI applications
-
-🧪 Notes
-
-1. Recommended audio format: WAV
-2. Lightweight model designed for edge usage
-3. Suitable for demos, research, and hackathons
+1. Files are processed locally
+2. No data is stored or uploaded
+3. No internet required after setup

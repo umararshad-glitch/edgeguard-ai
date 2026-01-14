@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>EdgeGuard AI</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at top, #0f172a, #020617);
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .card {
+      background: #020617;
+      padding: 32px;
+      border-radius: 16px;
+      width: 440px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.8);
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      text-align: center;
+      color: #38bdf8;
+      margin-bottom: 4px;
+    }
+
+    p {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
+
+    .drop-zone {
+      border: 2px dashed #38bdf8;
+      padding: 20px;
+      text-align: center;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .drop-zone.dragover {
+      background: rgba(56,189,248,0.1);
+    }
+
+    button {
+      width: 100%;
+      margin-top: 18px;
+      padding: 12px;
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      color: #020617;
+      font-weight: bold;
+    }
+
+    button:disabled {
+      background: #334155;
+      cursor: not-allowed;
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 15px;
+      display: none;
+    }
+
+    canvas {
+      width: 100%;
+      height: 80px;
+      margin-top: 10px;
+    }
+
+    .result {
+      margin-top: 22px;
+      padding: 16px;
+      background: #020617;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .badge {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .real { color: #22c55e; }
+    .fake { color: #ef4444; }
+
+    .bar {
+      height: 10px;
+      background: #1e293b;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .fill {
+      height: 100%;
+      width: 0%;
+      transition: width 0.6s ease;
+    }
+
+    .spinner {
+      color: #38bdf8;
+      font-size: 14px;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { opacity: 0.3; }
+    }
+
+    .info {
+      font-size: 14px;
+      cursor: help;
+      margin-left: 6px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+    <h1>EdgeGuard AI</h1>
+    <p>Offline Audio Deepfake Detection</p>
+
+    <div id="dropZone" class="drop-zone">
+      Drag & drop WAV file here<br>or click to select
+      <input type="file" id="fileInput" accept=".wav" hidden />
+    </div>
+
+    <audio id="audioPlayer" controls></audio>
+    <canvas id="waveform"></canvas>
+
+    <button id="analyzeBtn">Analyze Audio</button>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    const dropZone = document.getElementById("dropZone");
+    const fileInput = document.getElementById("fileInput");
+    const analyzeBtn = document.getElementById("analyzeBtn");
+    const resultDiv = document.getElementById("result");
+    const audioPlayer = document.getElementById("audioPlayer");
+
+    dropZone.onclick = () => fileInput.click();
+
+    dropZone.ondragover = e => {
+      e.preventDefault();
+      dropZone.classList.add("dragover");
+    };
+
+    dropZone.ondragleave = () => dropZone.classList.remove("dragover");
+
+    dropZone.ondrop = e => {
+      e.preventDefault();
+      dropZone.classList.remove("dragover");
+      fileInput.files = e.dataTransfer.files;
+      handleFile();
+    };
+
+    fileInput.onchange = handleFile;
+
+    function handleFile() {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      const url = URL.createObjectURL(file);
+      audioPlayer.src = url;
+      audioPlayer.style.display = "block";
+      drawWaveform(file);
+    }
+
+    analyzeBtn.onclick = async () => {
+      if (!fileInput.files.length) {
+        alert("Please select a WAV file");
+        return;
+      }
+
+      analyzeBtn.disabled = true;
+      resultDiv.innerHTML = `<div class="spinner">Analyzing offline…</div>`;
+
+      const formData = new FormData();
+      formData.append("file", fileInput.files[0]);
+
+      try {
+        const res = await fetch("http://127.0.0.1:8000/analyze-audio", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+        const isReal = data.prediction === "REAL";
+
+        resultDiv.innerHTML = `
+          <div class="badge ${isReal ? "real" : "fake"}">
+            ${data.prediction}
+            <span class="info" title="Prediction based on spectral inconsistencies and MFCC patterns detected offline.">ⓘ</span>
+          </div>
+          <div>Mode: ${data.mode}</div>
+          <div>Confidence: ${data.confidence}%</div>
+          <div class="bar">
+            <div class="fill" style="background:${isReal ? "#22c55e" : "#ef4444"}; width:${data.confidence}%"></div>
+          </div>
+        `;
+      } catch {
+        resultDiv.innerHTML = "Error analyzing file";
+      }
+
+      analyzeBtn.disabled = false;
+    };
+
+    function drawWaveform(file) {
+      const canvas = document.getElementById("waveform");
+      const ctx = canvas.getContext("2d");
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const audioCtx = new AudioContext();
+        audioCtx.decodeAudioData(reader.result, buffer => {
+          const data = buffer.getChannelData(0);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.strokeStyle = "#38bdf8";
+          ctx.beginPath();
+
+          const step = Math.ceil(data.length / canvas.width);
+          for (let i = 0; i < canvas.width; i++) {
+            const min = Math.min(...data.slice(i * step, (i + 1) * step));
+            const max = Math.max(...data.slice(i * step, (i + 1) * step));
+            ctx.moveTo(i, (1 + min) * 40);
+            ctx.lineTo(i, (1 + max) * 40);
+          }
+          ctx.stroke();
+        });
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+  </script>
+
+</body>
+</html>

@@ -1,211 +1,244 @@
-<!-- EDGEGUARD TEST CHANGE -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>EdgeGuard AI</title>
+    <meta charset="UTF-8" />
+    <title>EdgeGuard AI</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Segoe UI", system-ui, sans-serif;
+        }
 
-    body {
-      margin: 0;
-      height: 100vh;
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #0f172a, #020617);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #e5e7eb;
-    }
+        body {
+            margin: 0;
+            height: 100vh;
+            background: radial-gradient(circle at top, #0f172a, #020617);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e5e7eb;
+        }
 
-    .card {
-      width: 420px;
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(10px);
-      border-radius: 18px;
-      padding: 28px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-      animation: fadeIn 0.8s ease;
-    }
+        .card {
+            width: 420px;
+            background: rgba(15, 23, 42, 0.85);
+            border-radius: 18px;
+            padding: 28px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(14px);
+        }
 
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(15px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
+        h1 {
+            text-align: center;
+            margin-bottom: 6px;
+            font-size: 28px;
+            font-weight: 700;
+        }
 
-    h1 {
-      margin: 0;
-      font-size: 24px;
-      text-align: center;
-      color: #f8fafc;
-      letter-spacing: 0.5px;
-    }
+        .subtitle {
+            text-align: center;
+            font-size: 14px;
+            opacity: 0.75;
+            margin-bottom: 24px;
+        }
 
-    .subtitle {
-      text-align: center;
-      font-size: 13px;
-      color: #94a3b8;
-      margin-bottom: 22px;
-    }
+        label {
+            font-size: 14px;
+            margin-bottom: 6px;
+            display: block;
+            opacity: 0.9;
+        }
 
-    label {
-      font-size: 13px;
-      color: #cbd5f5;
-    }
+        select,
+        input[type="file"] {
+            width: 100%;
+            background: #020617;
+            color: #e5e7eb;
+            border: 1px solid #1e293b;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 14px;
+        }
 
-    select,
-    input[type="file"],
-    button {
-      width: 100%;
-      margin-top: 10px;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-      font-size: 14px;
-    }
+        button {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            color: white;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
 
-    select,
-    input[type="file"] {
-      background: #020617;
-      color: #e5e7eb;
-      border: 1px solid #1e293b;
-    }
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5);
+        }
 
-    button {
-      margin-top: 18px;
-      background: linear-gradient(135deg, #2563eb, #1e40af);
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
+        audio {
+            width: 100%;
+            margin-top: 14px;
+            display: none;
+        }
 
-    button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.5);
-    }
+        canvas {
+            width: 100%;
+            height: 90px;
+            margin-top: 14px;
+            display: none;
+        }
 
-    #result {
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 12px;
-      background: rgba(2, 6, 23, 0.8);
-      border: 1px solid #1e293b;
-      font-size: 14px;
-      line-height: 1.6;
-      animation: fadeIn 0.4s ease;
-    }
+        .result {
+            margin-top: 18px;
+            padding: 16px;
+            border-radius: 14px;
+            background: rgba(2, 6, 23, 0.85);
+            display: none;
+        }
 
-    .badge {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
 
-    .REAL {
-      background: #064e3b;
-      color: #6ee7b7;
-    }
+        .real {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+        }
 
-    .FAKE {
-      background: #450a0a;
-      color: #fca5a5;
-    }
+        .fake {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
 
-    .UNCERTAIN {
-      background: #3f2f04;
-      color: #fde68a;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 14px;
-      font-size: 11px;
-      color: #64748b;
-    }
-  </style>
+        .footer {
+            margin-top: 18px;
+            text-align: center;
+            font-size: 12px;
+            opacity: 0.6;
+        }
+    </style>
 </head>
 
 <body>
+    <div class="card">
+        <h1>EdgeGuard AI</h1>
+        <div class="subtitle">Offline Audio & Video Deepfake Detection</div>
 
-  <div class="card">
-    <h1>EdgeGuard AI</h1>
-    <div class="subtitle">
-      Offline Audio & Video Deepfake Detection
+        <label>Input Type</label>
+        <select id="inputType">
+            <option value="audio">Audio (.wav)</option>
+        </select>
+
+        <input type="file" id="fileInput" accept=".wav" />
+
+        <button onclick="analyze()">Analyze</button>
+
+        <!-- Audio Preview -->
+        <audio id="audioPlayer" controls></audio>
+
+        <!-- Waveform -->
+        <canvas id="waveform"></canvas>
+
+        <!-- Result -->
+        <div class="result" id="resultBox">
+            <div id="resultBadge" class="badge"></div>
+            <div id="resultText"></div>
+        </div>
+
+        <div class="footer">Edge AI · Privacy-First · Fully Offline</div>
     </div>
 
-    <label>Input Type</label>
-    <select id="inputType">
-      <option value="audio">Audio (.wav)</option>
-      <option value="video">Video (.mp4)</option>
-    </select>
+<script>
+const fileInput = document.getElementById("fileInput");
+const audioPlayer = document.getElementById("audioPlayer");
+const canvas = document.getElementById("waveform");
+const ctx = canvas.getContext("2d");
+const resultBox = document.getElementById("resultBox");
+const resultBadge = document.getElementById("resultBadge");
+const resultText = document.getElementById("resultText");
 
-    <input type="file" id="fileInput" />
+// Show audio + waveform on file select
+fileInput.addEventListener("change", () => {
+    const file = fileInput.files[0];
+    if (!file) return;
 
-    <button onclick="analyzeFile()">Analyze</button>
+    // Audio preview
+    const url = URL.createObjectURL(file);
+    audioPlayer.src = url;
+    audioPlayer.style.display = "block";
 
-    <div id="result"></div>
+    // Waveform
+    const reader = new FileReader();
+    reader.onload = async () => {
+        const audioCtx = new AudioContext();
+        const buffer = await audioCtx.decodeAudioData(reader.result);
+        drawWaveform(buffer.getChannelData(0));
+    };
+    reader.readAsArrayBuffer(file);
+});
 
-    <footer>
-      Edge AI · Privacy-First · Offline
-    </footer>
-  </div>
+function drawWaveform(data) {
+    canvas.style.display = "block";
+    canvas.width = canvas.offsetWidth;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = "#3b82f6";
+    ctx.lineWidth = 1;
 
-  <script>
-    async function analyzeFile() {
-      const fileInput = document.getElementById("fileInput");
-      const inputType = document.getElementById("inputType").value;
-      const resultDiv = document.getElementById("result");
+    const step = Math.ceil(data.length / canvas.width);
+    const amp = canvas.height / 2;
 
-      if (!fileInput.files.length) {
-        alert("Please select a file");
-        return;
-      }
-
-      const file = fileInput.files[0];
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const endpoint =
-        inputType === "audio"
-          ? "http://127.0.0.1:8000/analyze-audio"
-          : "http://127.0.0.1:8000/analyze-video";
-
-      resultDiv.innerHTML = "Analyzing…";
-
-      try {
-        const response = await fetch(endpoint, {
-          method: "POST",
-          body: formData
-        });
-
-        const data = await response.json();
-
-        resultDiv.innerHTML = `
-          <div class="badge ${data.prediction}">
-            ${data.prediction}
-          </div>
-          <div><strong>Confidence:</strong> ${data.confidence}%</div>
-          <div><strong>Engine:</strong> ${data.engine}</div>
-        `;
-      } catch (error) {
-        resultDiv.innerHTML = "Failed to connect to backend.";
-      }
+    ctx.beginPath();
+    for (let i = 0; i < canvas.width; i++) {
+        let min = 1.0;
+        let max = -1.0;
+        for (let j = 0; j < step; j++) {
+            const v = data[i * step + j];
+            if (v < min) min = v;
+            if (v > max) max = v;
+        }
+        ctx.moveTo(i, (1 + min) * amp);
+        ctx.lineTo(i, (1 + max) * amp);
     }
-  </script>
+    ctx.stroke();
+}
 
+// Analyze button
+async function analyze() {
+    const file = fileInput.files[0];
+    if (!file) {
+        alert("Please select an audio file");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("http://127.0.0.1:8000/analyze-audio", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await response.json();
+
+    resultBox.style.display = "block";
+    resultBadge.textContent = data.prediction;
+    resultBadge.className = "badge " + (data.prediction === "REAL" ? "real" : "fake");
+
+    resultText.innerHTML = `
+        <strong>Confidence:</strong> ${data.confidence}%<br>
+        <strong>Engine:</strong> ${data.engine}<br>
+        <strong>Mode:</strong> ${data.mode}
+    `;
+}
+</script>
 </body>
 </html>

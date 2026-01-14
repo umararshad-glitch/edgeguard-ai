@@ -37,11 +37,11 @@ The system runs entirely on the **local device (edge)** without sending any data
 
 **Pipeline:**
 
-Frontend (HTML/JS)
-↓
-FastAPI Backend
-↓
-Offline Audio Engine (PyTorch)
+      Frontend (HTML/JS)
+               ↓
+      FastAPI Backend
+               ↓
+      Offline Audio Engine (PyTorch)
 
 
 ---
@@ -81,24 +81,27 @@ frontend/index.html
 🖱️ One-Click Run (Windows)
 
 For easier access on Windows:
-Open the project folder in File Explorer
-Double-click:
-run.bat
-Backend starts automatically
-Open frontend/index.html in browser
+1. Open the project folder in File Explorer
+2. Double-click:
+   run.bat
+3. Backend starts automatically
+4. Open frontend/index.html in browser
 
 🔒 Privacy & Offline Mode
-All audio is processed locally
-No files are stored permanently
-No internet connection required after setup
+
+1. All audio is processed locally
+2. No files are stored permanently
+3. No internet connection required after setup
 
 🎯 Use Cases
-Detecting AI-generated or manipulated audio
-Testing synthetic voices
-Educational demos on audio deepfakes
-Privacy-focused edge AI applications
+
+1. Detecting AI-generated or manipulated audio
+2. Testing synthetic voices
+3. Educational demos on audio deepfakes
+4. Privacy-focused edge AI applications
 
 🧪 Notes
-Recommended audio format: WAV
-Lightweight model designed for edge usage
-Suitable for demos, research, and hackathons
+
+1. Recommended audio format: WAV
+2. Lightweight model designed for edge usage
+3. Suitable for demos, research, and hackathons

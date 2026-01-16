@@ -1,4 +1,8 @@
+data/
+*.wav
+*.flac
+*.mp3
+*.m4a
+model/audio_model.pkl
 __pycache__/
-uploads/
-*.pyc
-.env
+

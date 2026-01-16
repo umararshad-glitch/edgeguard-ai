@@ -1,45 +1,39 @@
-import torch
+import os
 import librosa
 import numpy as np
+import joblib
 
-labels = ["REAL", "FAKE"]
+# -------- CONFIG --------
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODEL_PATH = os.path.join(BASE_DIR, "model", "audio_model.pkl")
 
-# Simple offline demo model
-model = torch.nn.Sequential(
-    torch.nn.Linear(40, 32),
-    torch.nn.ReLU(),
-    torch.nn.Linear(32, 2),
-    torch.nn.Softmax(dim=1)
-)
+# Load trained model
+model = joblib.load(MODEL_PATH)
 
-model.eval()
+# -------- FEATURE EXTRACTION --------
+def extract_features(path):
+    y, sr = librosa.load(path, sr=16000)
+    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
+    return np.mean(mfcc.T, axis=0)
 
+# -------- PREDICTION --------
 def analyze_audio(audio_path):
-    # Load audio
-    signal, sr = librosa.load(audio_path, sr=16000)
+    feats = extract_features(audio_path).reshape(1, -1)
+    probs = model.predict_proba(feats)[0]
 
-    # Extract MFCC features
-    mfcc = librosa.feature.mfcc(y=signal, sr=sr, n_mfcc=40)
-    mfcc_mean = np.mean(mfcc.T, axis=0)
+    fake_prob = probs[1]
+    real_prob = probs[0]
 
-    # Convert to tensor
-    x = torch.tensor(mfcc_mean).float().unsqueeze(0)
+    prediction = "FAKE" if fake_prob > real_prob else "REAL"
+    confidence = max(fake_prob, real_prob) * 100
 
-    with torch.no_grad():
-        output = model(x)
-        confidence, prediction = torch.max(output, dim=1)
-
-    confidence_value = confidence.item()
-
-    # 🔹 Confidence-based decision
-    if confidence_value < 0.60:
-        final_label = "UNCERTAIN"
-    else:
-        final_label = labels[prediction.item()]
+    # ---- Confidence calibration (important) ----
+    if confidence > 90 and prediction == "FAKE":
+        confidence -= 20  # dampen overconfidence for real-world audio
 
     return {
-        "engine": "EdgeGuard-ALT",
-        "mode": "OFFLINE",
-        "prediction": final_label,
-        "confidence": round(confidence_value * 100, 2)
+        "prediction": prediction,
+        "confidence": round(confidence, 2),
+        "engine": "ASVspoof2019-LA (Trained)"
     }
+

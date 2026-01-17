@@ -7,7 +7,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
 import joblib
 
-# ---------------- CONFIG ----------------
+# CONFIG 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data", "ASVspoof2019_LA")
 TRAIN_DIR = os.path.join(DATA_DIR, "ASVspoof2019_LA_train", "flac")
@@ -19,13 +19,13 @@ PROTOCOL = os.path.join(
 
 MODEL_OUT = os.path.join(os.path.dirname(__file__), "audio_model.pkl")
 
-# ---------------- FEATURE EXTRACTION ----------------
+# FEATURE EXTRACTION 
 def extract_features(path):
     y, sr = librosa.load(path, sr=16000)
     mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
     return np.mean(mfcc.T, axis=0)
 
-# ---------------- LOAD DATA ----------------
+#  LOAD DATA 
 X, y = [], []
 
 print("Loading ASVspoof protocol...")
@@ -48,7 +48,7 @@ y = np.array(y)
 
 print(f"Loaded {len(X)} samples")
 
-# ---------------- TRAIN MODEL ----------------
+#  TRAIN MODEL 
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
@@ -64,6 +64,6 @@ model.fit(X_train, y_train)
 acc = model.score(X_test, y_test)
 print(f"Validation accuracy: {acc:.4f}")
 
-# ---------------- SAVE MODEL ----------------
+#  SAVE MODEL 
 joblib.dump(model, MODEL_OUT)
 print(f"Model saved as {MODEL_OUT}")

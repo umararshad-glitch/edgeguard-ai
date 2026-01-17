@@ -2,20 +2,20 @@ import sys
 import os
 import shutil
 
-# ---------------- PATH FIX (CRITICAL) ----------------
+#  PATH  
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
 
-# ---------------- FASTAPI ----------------
+#  FASTAPI 
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 
-# ---------------- MODEL IMPORT ----------------
+#  MODEL IMPORT 
 from model.audio_engine import analyze_audio
 from model.video_engine import analyze_video
 
 
-# ---------------- APP SETUP ----------------
+#  APP SETUP 
 app = FastAPI()
 
 app.add_middleware(
@@ -25,11 +25,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---------------- UPLOADS ----------------
+#  UPLOADS 
 UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# ---------------- ROUTES ----------------
+#  ROUTES 
 @app.post("/analyze-audio")
 async def analyze_audio_endpoint(file: UploadFile = File(...)):
     file_path = os.path.join(UPLOAD_DIR, file.filename)

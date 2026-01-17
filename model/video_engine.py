@@ -1,7 +1,7 @@
 import os
 import cv2
 
-# ---------------- SETUP ----------------
+#  SETUP 
 TEMP_FRAMES_DIR = "temp_frames"
 
 # Load Haar cascade (comes with OpenCV)
@@ -9,7 +9,7 @@ FACE_CASCADE = cv2.CascadeClassifier(
     cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
 )
 
-# ---------------- FRAME EXTRACTION ----------------
+#  FRAME EXTRACTION 
 def extract_frames(video_path, every_n=10):
     os.makedirs(TEMP_FRAMES_DIR, exist_ok=True)
     cap = cv2.VideoCapture(video_path)
@@ -35,7 +35,7 @@ def extract_frames(video_path, every_n=10):
     return saved
 
 
-# ---------------- FACE DETECTION ----------------
+#  FACE DETECTION 
 def count_faces(frame_path):
     img = cv2.imread(frame_path)
     if img is None:
@@ -48,7 +48,7 @@ def count_faces(frame_path):
     return len(faces)
 
 
-# ---------------- VIDEO ANALYSIS ----------------
+#  VIDEO ANALYSIS
 def analyze_video(video_path):
     frame_count = extract_frames(video_path)
 
@@ -58,7 +58,7 @@ def analyze_video(video_path):
             if count_faces(os.path.join(TEMP_FRAMES_DIR, fname)) > 0:
                 face_frames += 1
 
-    # --------- SIMPLE & EXPLAINABLE HEURISTIC ---------
+    # SIMPLE & EXPLAINABLE HEURISTIC
     if face_frames < max(3, frame_count * 0.3):
         prediction = "FAKE"
         confidence = 75

@@ -12,3 +12,4 @@ backend/temp_frames/
 
 # One-time scripts
 model/build_reference_mfcc.py
+temp_frames/

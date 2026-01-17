@@ -15,6 +15,7 @@
       --blue: #2563eb;
       --green: #065f46;
       --red: #7f1d1d;
+      --yellow: #7c6f1d;
     }
 
     * {
@@ -33,7 +34,7 @@
     }
 
     .card {
-      width: 440px;
+      width: 480px;
       background: var(--card-bg);
       border-radius: 18px;
       padding: 28px;
@@ -121,22 +122,15 @@
       margin-bottom: 8px;
     }
 
-    .real {
-      background: var(--green);
-      color: #a7f3d0;
-    }
-
-    .fake {
-      background: var(--red);
-      color: #fecaca;
-    }
+    .real { background: var(--green); color: #a7f3d0; }
+    .fake { background: var(--red); color: #fecaca; }
+    .uncertain { background: var(--yellow); color: #fef3c7; }
 
     canvas {
       width: 100%;
-      height: 60px;
-      margin-top: 10px;
       background: #020617;
       border-radius: 8px;
+      margin-top: 10px;
     }
 
     audio, video {
@@ -181,7 +175,10 @@
 
   <!-- Audio -->
   <audio id="audioPlayer" controls hidden></audio>
-  <canvas id="waveform" hidden></canvas>
+  <canvas id="waveform" height="70" hidden></canvas>
+
+  <!-- MFCC HEATMAP -->
+  <canvas id="mfccHeatmap" height="120" hidden></canvas>
 
   <!-- Video -->
   <video id="videoPlayer" controls hidden></video>
@@ -195,16 +192,20 @@ const fileName = document.getElementById("fileName");
 const result = document.getElementById("result");
 const audioPlayer = document.getElementById("audioPlayer");
 const videoPlayer = document.getElementById("videoPlayer");
-const canvas = document.getElementById("waveform");
-const ctx = canvas.getContext("2d");
+const waveform = document.getElementById("waveform");
+const wfCtx = waveform.getContext("2d");
+const heatmap = document.getElementById("mfccHeatmap");
+const hmCtx = heatmap.getContext("2d");
 const typeSelect = document.getElementById("typeSelect");
 
 function switchType() {
   audioPlayer.hidden = true;
-  canvas.hidden = true;
+  waveform.hidden = true;
+  heatmap.hidden = true;
   videoPlayer.hidden = true;
   fileInput.value = "";
   fileName.textContent = "No file selected";
+  result.innerHTML = `<div style="opacity:0.5;">Awaiting analysis…</div>`;
 }
 
 fileInput.onchange = () => {
@@ -217,7 +218,7 @@ fileInput.onchange = () => {
   if (typeSelect.value === "audio") {
     audioPlayer.src = url;
     audioPlayer.hidden = false;
-    canvas.hidden = false;
+    waveform.hidden = false;
     drawWaveform(file);
   } else {
     videoPlayer.src = url;
@@ -226,45 +227,42 @@ fileInput.onchange = () => {
 };
 
 async function analyze() {
-  if (!fileInput.files.length) {
-    alert("Please select a file.");
-    return;
-  }
+  if (!fileInput.files.length) return alert("Select a file first.");
 
   result.innerHTML = "Analyzing…";
 
   const form = new FormData();
   form.append("file", fileInput.files[0]);
 
-  const endpoint =
-    typeSelect.value === "video"
-      ? "http://127.0.0.1:8000/analyze-video"
-      : "http://127.0.0.1:8000/analyze-audio";
+  const endpoint = typeSelect.value === "video"
+    ? "http://127.0.0.1:8000/analyze-video"
+    : "http://127.0.0.1:8000/analyze-audio";
 
   const res = await fetch(endpoint, { method: "POST", body: form });
   const data = await res.json();
 
-  const cls = data.prediction === "REAL" ? "real" : "fake";
+  await new Promise(r => setTimeout(r, 1500));
+
+  const cls =
+    data.prediction === "REAL" ? "real" :
+    data.prediction === "FAKE" ? "fake" : "uncertain";
 
   result.innerHTML = `
-  <div class="badge ${cls}">${data.prediction}</div>
-  <div>Confidence: ${data.confidence}%</div>
-
-  <div style="font-size:12px;opacity:0.6;">
-    Engine: ${data.engine}
-  </div>
-
-  ${data.mfcc_deviation_score !== undefined ? `
-    <div style="margin-top:8px;font-size:12px;opacity:0.8;">
-      Modulation deviation score:
-      <b>${data.mfcc_deviation_score}</b>
+    <div class="badge ${cls}">${data.prediction}</div>
+    <div>Confidence: ${data.confidence}%</div>
+    <div style="font-size:12px;opacity:0.6;">Engine: ${data.engine}</div>
+    <div style="margin-top:6px;font-size:12px;">
+      MFCC deviation score: <b>${data.mfcc_deviation_score}</b>
     </div>
     <div style="font-size:11px;opacity:0.55;">
       ${data.explanation}
     </div>
-  ` : ``}
-`;
+  `;
 
+  if (data.mfcc_diff_map && data.mfcc_diff_map.length) {
+    drawMFCCHeatmap(data.mfcc_diff_map);
+    heatmap.hidden = false;
+  }
 }
 
 function drawWaveform(file) {
@@ -275,20 +273,37 @@ function drawWaveform(file) {
     const buffer = await audioCtx.decodeAudioData(reader.result);
     const data = buffer.getChannelData(0);
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.beginPath();
+    wfCtx.clearRect(0, 0, waveform.width, waveform.height);
+    wfCtx.beginPath();
 
-    for (let i = 0; i < canvas.width; i++) {
-      const idx = Math.floor(i / canvas.width * data.length);
-      const y = (1 - data[idx]) * canvas.height / 2;
-      ctx.lineTo(i, y);
+    for (let i = 0; i < waveform.width; i++) {
+      const idx = Math.floor(i / waveform.width * data.length);
+      const y = (1 - data[idx]) * waveform.height / 2;
+      wfCtx.lineTo(i, y);
     }
 
-    ctx.strokeStyle = "#2563eb";
-    ctx.stroke();
+    wfCtx.strokeStyle = "#2563eb";
+    wfCtx.stroke();
   };
 
   reader.readAsArrayBuffer(file);
+}
+
+function drawMFCCHeatmap(diffMap) {
+  const rows = diffMap.length;
+  const cols = diffMap[0].length;
+
+  heatmap.width = cols;
+  heatmap.height = rows;
+
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const v = diffMap[y][x];
+      const intensity = Math.min(255, v * 120);
+      hmCtx.fillStyle = `rgb(${intensity},0,0)`;
+      hmCtx.fillRect(x, y, 1, 1);
+    }
+  }
 }
 </script>
 

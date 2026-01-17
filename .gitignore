@@ -6,3 +6,9 @@ data/
 model/audio_model.pkl
 __pycache__/
 
+# Runtime artifacts
+uploads/
+backend/temp_frames/
+
+# One-time scripts
+model/build_reference_mfcc.py

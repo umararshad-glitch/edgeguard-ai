@@ -9,7 +9,7 @@
     :root {
       --bg-main: radial-gradient(circle at top, #0b1228, #020617);
       --card-bg: rgba(15, 23, 42, 0.9);
-      --border: #1e293b;
+      --border: #1e1e3b;
       --text-main: #e5e7eb;
       --text-muted: #94a3b8;
       --blue: #2563eb;
@@ -247,10 +247,24 @@ async function analyze() {
   const cls = data.prediction === "REAL" ? "real" : "fake";
 
   result.innerHTML = `
-    <div class="badge ${cls}">${data.prediction}</div>
-    <div>Confidence: ${data.confidence}%</div>
-    <div style="font-size:12px;opacity:0.6;">Engine: ${data.engine}</div>
-  `;
+  <div class="badge ${cls}">${data.prediction}</div>
+  <div>Confidence: ${data.confidence}%</div>
+
+  <div style="font-size:12px;opacity:0.6;">
+    Engine: ${data.engine}
+  </div>
+
+  ${data.mfcc_deviation_score !== undefined ? `
+    <div style="margin-top:8px;font-size:12px;opacity:0.8;">
+      Modulation deviation score:
+      <b>${data.mfcc_deviation_score}</b>
+    </div>
+    <div style="font-size:11px;opacity:0.55;">
+      ${data.explanation}
+    </div>
+  ` : ``}
+`;
+
 }
 
 function drawWaveform(file) {
